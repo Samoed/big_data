@@ -1,4 +1,5 @@
 from mrjob.job import MRJob
+from mrjob.step import MRStep
 from collections import Counter
 import nltk
 from nltk.util import ngrams
@@ -8,13 +9,22 @@ import string
 from nltk.stem import WordNetLemmatizer
 
 class MRSongCount(MRJob):
-    def mapper_init(self):
+    def steps(self):
+        return [
+            MRStep(
+                mapper_init=self.mapper_init_first,
+                mapper=self.mapper_first,
+                reducer=self.reducer_first
+            ),
+            MRStep(reducer=self.reducer_second)
+        ]
+    
+    def mapper_init_first(self):
         nltk.download('punkt')
         nltk.download('stopwords')
         nltk.download('wordnet')
-        
 
-    def mapper(self, _, text):
+    def mapper_first(self, _, text):
         lines = text.split("\n")
         replics = []
         for line in lines:
@@ -38,8 +48,12 @@ class MRSongCount(MRJob):
             return_word = " ".join(words)
             yield return_word, replic
 
-    def reducer(self, word, values):
-        yield (word, sum(values))
+    def reducer_first(self, word, values):
+        yield None, (word, sum(values))
+
+    def reducer_second(self, _, values):
+        for key, val in sorted(values, key=lambda x: x[1], reverse=True)[:20]:
+            yield key, val
         
 if __name__ == "__main__":
     MRSongCount.run()

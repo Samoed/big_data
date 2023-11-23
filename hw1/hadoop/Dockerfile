@@ -26,9 +26,9 @@ RUN ln -sf /opt/hadoop-3.3.6 /opt/hadoop
 RUN apt-get update -y \
     && apt-get install -y python3-pip
 
+RUN pip install nltk
 RUN mkdir -p /tmp/hadoop-hadoop
 
-RUN pip install nltk
 WORKDIR /opt/hadoop
 
 ENV JAVA_HOME /usr/lib/jvm/java-8-openjdk-amd64
@@ -59,7 +59,7 @@ FROM hive_hadoop_base AS jupyter_hadoop
 
 WORKDIR /opt
 
-RUN pip3 install notebook pyarrow mrjob nltk seaborn pandas matplotlib
+RUN pip3 install notebook
 
 FROM hive_hadoop_base AS zeppelin_hadoop
 
