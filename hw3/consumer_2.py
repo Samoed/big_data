@@ -1,4 +1,23 @@
+import time
+from functools import wraps
+
 from kafka import KafkaConsumer
+
+
+def backoff(tries: int, sleep: int) -> callable:
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            for attempt in range(tries):
+                try:
+                    return func(*args, **kwargs)
+                except Exception as e:
+                    if attempt < tries - 1:
+                        time.sleep(sleep)
+                    else:
+                        raise e
+        return wrapper
+    return decorator
 
 
 @backoff(tries=10, sleep=60)

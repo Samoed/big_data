@@ -1,5 +1,6 @@
-from pyflink.common import SimpleStringSchema
+from pyflink.common import SimpleStringSchema, Time
 from pyflink.common.typeinfo import RowTypeInfo, Types
+from pyflink.common.types import Row
 from pyflink.common.watermark_strategy import WatermarkStrategy
 from pyflink.datastream import StreamExecutionEnvironment, TimeCharacteristic
 from pyflink.datastream.checkpoint_storage import CheckpointStorage
@@ -11,7 +12,13 @@ from pyflink.datastream.connectors.kafka import (
     KafkaSource,
 )
 from pyflink.datastream.formats.json import JsonRowDeserializationSchema
-from pyflink.datastream.functions import MapFunction
+from pyflink.datastream.functions import MapFunction, ReduceFunction
+from pyflink.datastream.window import SlidingProcessingTimeWindows
+
+
+class MaxTemperatureReduceFunction(ReduceFunction):
+    def reduce(self, value1: Row, value2: Row):
+        return value1 if value1.temperature > value2.temperature else value2
 
 
 class TemperatureFunction(MapFunction):
@@ -71,9 +78,15 @@ def python_data_stream_example():
     )
 
     ds = env.from_source(source, WatermarkStrategy.no_watermarks(), "Kafka Source")
-    ds.map(TemperatureFunction(), Types.STRING()).sink_to(sink)
+    (
+        ds.key_by(lambda x: x[0])
+        .window(SlidingProcessingTimeWindows.of(Time.seconds(10), Time.seconds(5)))
+        .reduce(MaxTemperatureReduceFunction())
+        .map(TemperatureFunction(), Types.STRING())
+        .sink_to(sink)
+    )
 
-    env.execute_async("Devices preprocessing")
+    env.execute_async("Sliding devices preprocessing")
 
 
 if __name__ == "__main__":

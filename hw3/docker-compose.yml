@@ -29,7 +29,6 @@ services:
     environment:
       - JOB_MANAGER_RPC_ADDRESS=jobmanager
 
-
   zookeeper:
     image: wurstmeister/zookeeper:3.4.6
     ulimits:
@@ -52,3 +51,83 @@ services:
       KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:9092,EXTERNAL_SAME_HOST://localhost:29092
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL_SAME_HOST:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+
+  namenode_init:
+    build:
+      context: hadoop/.
+      target: build_hadoop
+    hostname: namenode
+    command: [ "hdfs", "namenode", "-format", "-force" ]
+    env_file:
+      - ./hadoop.env
+    volumes:
+      - hadoop_namenode:/tmp/hadoop-root/
+      - ./hadoop_conf/etc:/opt/hadoop/etc
+
+  namenode:
+    build:
+      context: hadoop/.
+      target: build_hadoop
+    hostname: namenode
+    command: [ "hdfs", "namenode" ]
+    env_file:
+      - ./hadoop.env
+    ports:
+      - "9870:9870"
+    volumes:
+      - hadoop_namenode:/tmp/hadoop-root/
+      - ./hadoop_conf/etc:/opt/hadoop/etc
+    depends_on:
+      - namenode_init
+
+  datanode1:
+    build:
+      context: hadoop/.
+      target: build_hadoop
+    hostname: datanode
+    command: [ "hdfs", "datanode" ]
+    env_file:
+      - ./hadoop.env
+    ports:
+      - "9864:9864"
+    volumes:
+      - hdfs1:/tmp/hadoop-hadoop
+      - ./hadoop_conf/etc:/opt/hadoop/etc
+
+  resourcemanager:
+    build:
+      context: hadoop/.
+      target: build_hadoop
+    hostname: resourcemanager
+    command: [ "yarn", "resourcemanager" ]
+    env_file:
+      - ./hadoop.env
+    ports:
+      - "8088:8088"
+    volumes:
+      - resourcemanager:/tmp/hadoop-hadoop
+      - ./hadoop_conf/etc:/opt/hadoop/etc
+
+  nodemanager1:
+    build:
+      context: hadoop/.
+      target: build_hadoop
+    hostname: nodemanager1
+    command: [ "yarn", "nodemanager" ]
+    env_file:
+      - ./hadoop.env
+    ports:
+      - "19888:19888"
+      - "8042:8042"
+    expose:
+      - 19888
+      - 8042
+    volumes:
+      - nodemanager1:/tmp/hadoop-hadoop
+      - ./hadoop_conf/etc:/opt/hadoop/etc
+
+volumes:
+  hdfs1:
+  resourcemanager:
+  nodemanager1:
+  hadoop_namenode:

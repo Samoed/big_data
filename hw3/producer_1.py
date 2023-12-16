@@ -2,8 +2,7 @@ import random
 from json import dumps
 from time import sleep
 
-from kafka import KafkaProducer
-from kafka import errors
+from kafka import KafkaProducer, errors
 
 
 def write_data(producer):

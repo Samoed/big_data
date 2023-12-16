@@ -1,37 +1,36 @@
 ### Kafka
 
 
-```commandline
+```bash
 docker-compose build
 ```
 
 
-```commandline
+```bash
 docker-compose up -d
 ```
 
-```commandline
+```bash
 docker-compose ps
 ```
 ```
 http://localhost:8081/#/overview
 
 ```
-```commandline
+```bash
 docker-compose down -v
 ```
 
-```commandline
-docker-compose exec kafka kafka-topics.sh --bootstrap-server kafka:9092 --create --topic topic_name --partitions 1 --replication-factor 1
+```bash
+docker-compose exec kafka kafka-topics.sh --bootstrap-server kafka:9092 --create --topic itmo2023 --partitions 1 --replication-factor 1
 ```
-```commandline
-docker-compose exec kafka kafka-topics.sh --bootstrap-server kafka:9092 --describe itmo  
+```bash
+docker-compose exec kafka kafka-topics.sh --bootstrap-server kafka:9092 --describe itmo2023  
 ```
-```commandline
- docker-compose exec kafka kafka-topics.sh --bootstrap-server kafka:9092 --alter --topic itmo --partitions 2
+```bash
+docker-compose exec kafka kafka-topics.sh --bootstrap-server kafka:9092 --alter --topic itmo2023 --partitions 2
+```
 
-```
-
-```commandline
+```bash
 docker-compose exec jobmanager ./bin/flink run -py /opt/pyflink/device_job.py -d  
 ```
