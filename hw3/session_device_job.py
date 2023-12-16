@@ -13,7 +13,10 @@ from pyflink.datastream.connectors.kafka import (
 )
 from pyflink.datastream.formats.json import JsonRowDeserializationSchema
 from pyflink.datastream.functions import MapFunction, ReduceFunction
-from pyflink.datastream.window import TumblingProcessingTimeWindows, ProcessingTimeSessionWindows
+from pyflink.datastream.window import (
+    ProcessingTimeSessionWindows,
+    TumblingProcessingTimeWindows,
+)
 
 
 class MaxTemperatureReduceFunction(ReduceFunction):

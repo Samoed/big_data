@@ -16,7 +16,9 @@ def backoff(tries: int, sleep: int) -> callable:
                         time.sleep(sleep)
                     else:
                         raise e
+
         return wrapper
+
     return decorator
 
 
